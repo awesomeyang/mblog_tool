@@ -1,0 +1,51 @@
+<html>
+<meta content="text/html" charset="utf-8">
+
+<head>
+
+    <link rel="stylesheet" type="text/css" href="bower_components/simditor/styles/simditor.css" />
+    <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="bower_components/simple-module/lib/module.js"></script>
+    <script type="text/javascript" src="bower_components/simple-hotkeys/lib/hotkeys.js"></script>
+    <script type="text/javascript" src="bower_components/simple-uploader/lib/uploader.js"></script>
+    <script type="text/javascript" src="bower_components/simditor/lib/simditor.js"></script>
+    <style>
+        #submit:hover {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            background-color: grey;
+            font-size: 40px;
+            text-align: center;
+        }
+        
+        #submit {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            background-color: azure;
+            font-size: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <textarea id="editor" placeholder="Balabala" autofocus style="width:100%;height:100%"></textarea>
+    <div id="submit" onclick="javascript:submit()">确认</div>
+    <script>
+        var submit = function() {
+            var data = editor.getValue();
+            $.post('http://localhost:8000', data, function(data) {
+                window.close();
+            });
+            console.log(data);
+        }
+        editor = new Simditor({
+            textarea: $('#editor'),
+            placeholder: 'input here',
+        });
+    </script>
+</body>
+
+</html>

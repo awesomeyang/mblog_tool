@@ -1,0 +1,15 @@
+{
+  "name": "localblog",
+  "version": "1.0.0",
+  "description": "localblog_editor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "maxwell yang",
+  "license": "MIT",
+  "dependencies": {
+    "module.js": "^2.2.4",
+    "simditor": "^2.3.6"
+  }
+}
