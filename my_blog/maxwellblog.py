@@ -1,6 +1,9 @@
 import sys
 import os
 import webbrowser
+import time
+import json
+import shutil
 '''
 maxwellyang github blog 命令行工具
 init 初始化git与个人资料
@@ -13,9 +16,7 @@ upload 更新blog
 list 查看文章列表
 help 使用帮助
 '''
-import time
-import json
-import shutil
+
 
 command=sys.argv
 if command[1]=='init':

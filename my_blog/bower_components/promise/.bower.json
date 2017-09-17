@@ -1,0 +1,14 @@
+{
+  "name": "promise",
+  "homepage": "https://github.com/then/promise",
+  "version": "7.3.1",
+  "_release": "7.3.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "7.3.1",
+    "commit": "3431f81cc0dc7e97adfc0e3fc65a3ee2519d7b6a"
+  },
+  "_source": "https://github.com/then/promise.git",
+  "_target": "^7.1.1",
+  "_originalSource": "then/promise"
+}
