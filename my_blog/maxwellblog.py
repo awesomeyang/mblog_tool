@@ -23,7 +23,7 @@ if command[1]=='init':
     print("欢迎使用maxwellblog 命令行工具")
     with open('userdata.json','r',encoding='utf-8') as f:                             #git设置
         j=json.loads(f.read())                                       
-    os.system('git init %s'%(os.path.join('.','githubpage')))
+    os.system('git init %s'%(os.path.join('.','githubpage2')))
     os.chdir('githubpage2')                                                       #githubpage 中有.git 文件所以不能push
     os.system('git config --global push.default current')
     os.system('git add *')
@@ -49,7 +49,7 @@ elif command[1]=='new':
 elif command[1]=='change':
     pass                                                                #内容更改目前需要手动完成
 elif command[1]=='upload':
-    shutil.copyfile(os.path.join('outcome','postdata.js'),os.path.join('githubpage','javascripts','postdata.js'))
+    shutil.copyfile(os.path.join('outcome','postdata.js'),os.path.join('githubpage2','javascripts','postdata.js'))
     os.chdir('githubpage2')
     os.system('git commit -am %d'%(int(time.time())))
     os.system('git push github --all -f')                                        #master->master is rejucted!! figour out the reason!!
