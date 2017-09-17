@@ -1,0 +1,11 @@
+{
+  "name": "localblog",
+  "description": "localblog_editor",
+  "main": "index.js",
+  "authors": [
+    "maxwell yang"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true
+}

@@ -1,11 +1,20 @@
 {
-  "name": "localblog",
-  "description": "localblog_editor",
-  "main": "index.js",
-  "authors": [
-    "maxwell yang"
-  ],
-  "license": "MIT",
-  "homepage": "",
-  "private": true
+    "name": "awesomeyang",
+    "description": "localblog_editor",
+    "main": "index.js",
+    "authors": [
+        "maxwell yang"
+    ],
+    "license": "MIT",
+    "homepage": "index.html",
+    "dependencies": {
+        "simditor": "^2.3.6"
+    },
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ]
 }

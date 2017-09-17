@@ -21,7 +21,7 @@ def handle_image(path,index):
         return 'n'                               
 
 
-def handlehtml(html):
+def handlehtml(html,title=""):
     chtml=BeautifulSoup(html,'html.parser')
     img=chtml.find_all('img')
     print(len(img))                  
@@ -36,24 +36,25 @@ def handlehtml(html):
             '''mistake_store''' 
         else:
             pass
-    complete_store(str(chtml))
+    complete_store(str(chtml),title)
 
-def complete_store(html):
-    title=""
-    for i in sys.argv[2:]:
-        title+=i
-        title+=" "
-    outcome='''{"postintro":{"id":%d,"title":"%s","date":"%s"},"post":{"id":%d,"content":"%s"}};'''%(timec,title,DATE,timec,html)
-    boutcome=outcome.encode('utf-8')
-    with open(os.path.join('outcome','rawpostdata.js'),'ab+') as f:  
-        f.write(boutcome)
-    with open(os.path.join('outcome','rawpostdata.js'),'rb+') as f:
-        data=f.read().decode().split(';')
-        data.pop(-1)
-        with open(os.path.join('outcome','postdata.js'),'wb+') as f:
-            outcome="var data=function(){ var data="+str(data)+";return data;}"
-            boutcome=outcome.encode('utf-8')
+def complete_store(html,title=""):
+    if title=="":
+        for i in sys.argv[2:]:
+            title+=i
+            title+=" "
+    else:
+        outcome='''{"postintro":{"id":%d,"title":"%s","date":"%s"},"post":{"id":%d,"content":"%s"}};'''%(timec,title,DATE,timec,html)
+        boutcome=outcome.encode('utf-8')
+        with open(os.path.join('outcome','rawpostdata.js'),'ab+') as f:  
             f.write(boutcome)
+        with open(os.path.join('outcome','rawpostdata.js'),'rb+') as f:
+            data=f.read().decode().split(';')
+            data.pop(-1)
+            with open(os.path.join('outcome','postdata.js'),'wb+') as f:
+                outcome="var data=function(){ var data="+str(data)+";return data;}"
+                boutcome=outcome.encode('utf-8')
+                f.write(boutcome)
 class handle(hs.SimpleHTTPRequestHandler):
     def do_POST(self):
         self.send_response(200)
@@ -67,7 +68,7 @@ class handle(hs.SimpleHTTPRequestHandler):
         
 
 if __name__=='__main__':
-    with socketserver.TCPServer(('localhost',PORT), handle) as httpd:
+    with socketserver.TCPServer(('localhost',PORT), handle) as httpd:                   #用localhost打开不能上传图片！
         print('serving....',end='\n')
         try:
             httpd.serve_forever()

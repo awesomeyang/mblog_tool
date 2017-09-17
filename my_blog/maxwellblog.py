@@ -13,27 +13,45 @@ upload 更新blog
 list 查看文章列表
 help 使用帮助
 '''
+import time
+import json
+import shutil
 
 command=sys.argv
 if command[1]=='init':
-    pass
+    print("欢迎使用maxwellblog 命令行工具")
+    with open('userdata.json','r',encoding='utf-8') as f:                             #git设置
+        j=json.loads(f.read())                                       
+    os.system('git init %s'%(os.path.join('.','githubpage')))
+    os.chdir('githubpage')
+    os.system('git config --global push.default current')
+    os.system('git add *')
+    os.system("git commit -m firstcommit")
+    os.system('git remote add github %s'%(j['githuburl']))    
+    os.system('git push github --all -f')
+    print('如果失败请先按照教程完成第二步')                                          #暂时未实现自动生成ssh的功能 姓名自我介绍功能暂时写死
+ 
+    
 elif command[1]=='state':
-    pass
+    with open('userdata.json','r',encoding='utf-8') as f:
+        j=json.loads(f.read())
+        print('username:%s \nintroduction:%s\neducation:%s\naward:%s\n '%(j['username'],j['introduction'],j['education'],j['award']))
 elif command[1]=='new':
     if command[2]=='-p':
         if command[3]=='-m':
-            pass
+            os.system("python handlemd.py")
         elif command[3]=='-t':
-            print (command[3],end='\n')
             webbrowser.open('http://localhost:8000')     
             os.system("python webtext.py --title %s"%(command[4]))      #title格式 'this is a title'
-             
     elif command[1]=='-b':
         pass
 elif command[1]=='change':
-    pass
+    pass                                                                #内容更改目前需要手动完成
 elif command[1]=='upload':
-    pass
+    shutil.copyfile(os.path.join('outcome','postdata.js'),os.path.join('githubpage','javascripts','postdata.js'))
+    os.chdir('githubpage')
+    os.system('git commit -am %d'%(int(time.time())))
+    os.system('git push github --all -f')                                        #master->master is rejucted!! figour out the reason!!
 elif command[1]=='list':
     pass
 elif command[1]=='help':
