@@ -24,7 +24,7 @@ if command[1]=='init':
     with open('userdata.json','r',encoding='utf-8') as f:                             #git设置
         j=json.loads(f.read())                                       
     os.system('git init %s'%(os.path.join('.','githubpage')))
-    os.chdir('githubpage')
+    os.chdir('githubpage2')                                                       #githubpage 中有.git 文件所以不能push
     os.system('git config --global push.default current')
     os.system('git add *')
     os.system("git commit -m firstcommit")
@@ -50,7 +50,7 @@ elif command[1]=='change':
     pass                                                                #内容更改目前需要手动完成
 elif command[1]=='upload':
     shutil.copyfile(os.path.join('outcome','postdata.js'),os.path.join('githubpage','javascripts','postdata.js'))
-    os.chdir('githubpage')
+    os.chdir('githubpage2')
     os.system('git commit -am %d'%(int(time.time())))
     os.system('git push github --all -f')                                        #master->master is rejucted!! figour out the reason!!
 elif command[1]=='list':
