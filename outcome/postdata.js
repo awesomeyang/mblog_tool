@@ -1,0 +1,1 @@
+var data=function(){ var data=['{"postintro": {"id": 1506249088.1941795, "title": "", "date": "2017-09-24"}, "post": {"id": 1506249088.1941795, "content": "<p>????</p>"}}'];return data;}
