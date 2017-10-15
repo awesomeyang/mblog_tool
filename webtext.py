@@ -7,11 +7,24 @@ import time
 import os
 import sys
 import shutil
+import sqlite3
 import json
 from bs4 import BeautifulSoup
 DATE=time.strftime('%Y-%m-%d',time.localtime(time.time()))
 PORT = 8000
-timec=time.time()
+timec=int(time.time())
+
+def postdata():                                                                 #完成postdata文件复制
+    con=sqlite3.connect(os.path.join('outcome','data.db'))
+    cur=con.cursor()
+    outcome=""
+    for i in cur.execute('SELECT * FROM ARTICAL;'):
+        outcome+=json.dumps({"id":i[0],"title":i[1],"date":i[2],"intro":i[3],"content":[4]})+","
+    boutcome="var data=["+outcome+"];"
+    with open(os.path.join('outcome','postdata.js'),'w+') as f:
+        f.write(boutcome)
+    shutil.copyfile(os.path.join('outcome','postdata.js'),os.path.join('githubpage','javascripts','postdata.js'))
+
 def handle_image(path,index):
     PATH=os.path.join('githubpage','images')                                      #处理图片文件
     if os.path.isfile(path):
@@ -28,12 +41,12 @@ def handlehtml(html,title="",change=0,id=0):                                    
     img=chtml.find_all('img')                
     for i in range(len(img)):                                                      #这里可能会有bug
         re=handle_image(img[i]['src'],i)
-        #print("handle image %d complete"%(i))                                     #不能加载服务器文件夹之外的文件 预计解决方案直接打开html文件 问题无法返回200关闭页面
+        #print("handle image %d complete"%(i))                                     #不能加载服务器文件夹之外的文件 图片文件需要容易复制到images文件夹中
         if re[0]=='s':
             img[i]['src']=os.path.join('images',re[1])        
         elif re[0]=='n':
             pass
-            '''mistake_store''' 
+            '''mistake_solve''' 
         else:
             pass
     try:
@@ -42,33 +55,28 @@ def handlehtml(html,title="",change=0,id=0):                                    
          complete_store(str(chtml),title=title)
 def complete_store(html,title="",change=0,id=0):
     if change==1:
-        with open(os.path.join('outcome','rawpostdata.js'),'wb+') as f:
-            data=f.read().decode().split(';')
-            for i in data:
-                ji=json.loads(i)
-                if ji['postintro']['id']==argv['id']:
-                    ji['post']['content']==html
-            outcome=data.join(';')+';'
-            boutcome=outcome.encode('utf-8')
-            f.write(boutcome)
+        con=sqlite3.connect(os.path.join('outcome','data.db'))
+        cur=con.cursor()
+        cur.execute('UPDATE ARTICAL SET CONTENT=:content WHERE ID=:id;',{'content':html,'id':id})
+        con.commit()
+        con.close()
+        postdata()
+        with open(os.path.join('outcome','temppostdata.js'),'w+') as f:
+            f.write("var data={'content':''}")
     else:
         if title=="":
             for i in sys.argv[2:]:
                 title+=i
                 title+=" "
-        outcome={"postintro":{"id":timec,"title":title,"date":DATE},"post":{"id":timec,"content":html}}
-        outcome=json.dumps(outcome)+";"
-        boutcome=outcome.encode('utf-8')
-        with open(os.path.join('outcome','rawpostdata.js'),'ab+') as f:  
-            f.write(boutcome)
-        with open(os.path.join('outcome','rawpostdata.js'),'rb+') as f:
-            data=f.read().decode().split(';')
-            data.pop(-1)
-            with open(os.path.join('outcome','postdata.js'),'wb+') as f:
-                outcome="var data=function(){ var data="+str(data)+";return data;}"
-                boutcome=outcome.encode('utf-8')
-                f.write(boutcome)
-        shutil.copyfile(os.path.join('outcome','postdata.js'),os.path.join('githubpage','javascripts','postdata.js'))
+        outcome={"id":timec,"title":title,"date":DATE,"intro":"","content":html}
+        boutcome=json.dumps(outcome)
+        con=sqlite3.connect(os.path.join('outcome','data.db'))
+        cur=con.cursor()
+        cur.execute("INSERT INTO ARTICAL  VALUES(:id,:title,:date,:intro,:content);",outcome)
+        con.commit()
+        con.close()
+        postdata()
+        
 class handle(hs.SimpleHTTPRequestHandler):
     def do_HEAD(self):
         self.send_response(200)
@@ -79,12 +87,10 @@ class handle(hs.SimpleHTTPRequestHandler):
         self.send_header('content-type','text/plain')
         self.end_headers()        
         data=self.rfile.read(int(self.headers['content-length']))
-        data.decode()
+        data=data.decode()
         try:
             changedata=json.loads(data)
-            handlehtml(changedata['post']['content'],id=changedata['post']['id'],change=1)
-            with open(os.path.join('outcome','temppostdata.js'),'w+') as f:
-                f.truncate()
+            handlehtml(changedata['content'],id=changedata['id'],change=1)             #changed
         except:
             handlehtml(data)
         raise KeyboardInterrupt

@@ -3,6 +3,7 @@ import os
 import webbrowser
 import time
 import json
+import sqlite3
 import shutil
 import handlemd
 '''
@@ -37,19 +38,29 @@ help 使用帮助
 }
 postdata.js
 可用js文件返回数据
-rawpostdata.js
-原始数据文件
-格式{};{};{}
-pako压缩功能暂未开发
+
 '''
 
 command=sys.argv
 if command[1]=='init':
     print("欢迎使用maxwellblog 命令行工具")
-    with open('userdata.json','r',encoding='utf-8') as f:                             #git设置
-        j=json.loads(f.read())                                       
-    os.system('git init %s'%(os.path.join('.','githubpage')))
-    os.chdir('githubpage')                                                       #githubpage 中有.git 文件所以不能push
+    with open('userdata.json','r',encoding='utf-8') as f:                             
+        j=json.loads(f.read())     
+    sql=sqlite3.connect(os.path.join('outcome','data.db'))                         #sqlite setting
+    s='''CREAT TABLE ARTICAL(
+        ID INT PRIMART KET NOT NULL,
+        TITLE TEXT NOT NULL,
+        DATE TEXT NOT NULL,
+        INTRO TEXT ,
+        CONTENT TEXT NOT NULL,
+    );
+    '''
+    cur=sql.cursor()
+    cur.execute(s)
+    sql.commit()
+    sql.close()
+    os.system('git init %s'%(os.path.join('.','githubpage')))                      #git设置
+    os.chdir('githubpage')                                                      
     os.system('git config --global push.default current')
     os.system('git add *')
     os.system("git commit -m firstcommit")
@@ -76,19 +87,25 @@ elif command[1]=='change':
         os.system('python handlemd.py change %s'%(command[3]))                     #用第一个md文件替换内容
     else:
         os.system('python webchange.py %s'%(command[2]))                           #用富文本打开的方式替换文本
-        webbrowser.open('http://localhost:8000')     
-        os.system("python webtext.py") 
+        try:
+            webbrowser.get('chrome').open('http://localhost:8000')
+        except :
+            print('更该文章需要使用chrome浏览器')
+        else:
+            os.system("python webtext.py") 
 elif command[1]=='upload':
     os.chdir('githubpage')
     os.system('git commit -am %d'%(int(time.time())))
     os.system('git push github --all -f')                                        #master->master is rejucted!! figour out the reason!!
 elif command[1]=='list':
-    with open(os.path.join('outcome','rawpostdata.js'),'rb+') as f:
-        f=f.read().decode().split(';')
-        f.pop(-1)
-        for i in f:
-            data=json.loads(i)
-            print("%s    %s"%(data['postintro']['id'],data['postintro']['title']),end='\n')
+    con=sqlite3.connect(os.path.join('outcome','data.db'))
+    cur=con.cursor()
+    index=0
+    for i in cur.execute('SELECT * FROM ARTICAL;'):
+        print("%s    %s"%(i[0],i[1]),end='\n')
+        index+=1
+    if index==0:
+        print('目前没有写过blog哦')
 elif command[1]=='help':
     data='''
 maxwellyang github blog 命令行工具

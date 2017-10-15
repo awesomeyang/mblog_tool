@@ -35,10 +35,9 @@
     <textarea id="editor" placeholder="Balabala" autofocus style="width:100%;height:100%"></textarea>
     <div id="submit" onclick="javascript:submit()">确认</div>
     <script>
-        var data = data();
         var submit = function() {
-            if (data != "") {
-                data['post']['content'] = editor.getValue();
+            if (data['content'] != "") {
+                data['content'] = editor.getValue();
                 var postdata = JSON.stringify(data);
             } else var postdata = editor.getValue();
             $.post('http://localhost:8000', postdata, function(data) {
@@ -48,7 +47,7 @@
         editor = new Simditor({
             textarea: $('#editor'),
         });
-        editor.setValue(data['post']['content'] || "")
+        editor.setValue(data['content'])
     </script>
 </body>
 

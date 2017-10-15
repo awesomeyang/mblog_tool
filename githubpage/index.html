@@ -141,10 +141,10 @@
         
         #postview {
             position: absolute;
-            width: 73%;
+            width: 60%;
             height: 97%;
             top: 1.5%;
-            right: 1%;
+            right: 5%;
             z-index: 10;
         }
         
@@ -218,7 +218,7 @@
     </div>
 
     <script>
-        var post_data = data();
+        var post_data = data || [];
         var sum = post_data.length;
         for (var i = 0; i < sum; i++) {
             var data = JSON.parse(post_data[i]);
