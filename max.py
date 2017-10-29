@@ -5,16 +5,16 @@ import time
 import json
 import sqlite3
 import shutil
-import handlemd
+import handlef
+from webtext import postdata
 '''
 maxwellyang github blog 命令行工具
 init 初始化git与个人资料
 state 查看个人资料
 new  新建blog文章 
-    post blog文章 
+    blog文章 
         markdown 
         webtext 'this is title'
-    book 读书简笔 格式 图片加文字
 change 更改文章内容
     markdown [id]
     [id]
@@ -35,7 +35,7 @@ if command[1]=='init':
         TITLE TEXT NOT NULL,
         DATE TEXT NOT NULL,
         INTRO TEXT ,
-        CONTENT TEXT NOT NULL,
+        CONTENT TEXT NOT NULL
     );
     '''
     cur=sql.cursor()
@@ -57,14 +57,11 @@ elif command[1]=='state':
         j=json.loads(f.read())
         print('username:%s \nintroduction:%s\neducation:%s\naward:%s\n '%(j['username'],j['introduction'],j['education'],j['award']))
 elif command[1]=='new':
-    if command[2]=='post':
-        if command[3]=='markdown':
-            os.system("python handlemd.py")
-        elif command[3]=='webtext':
-            webbrowser.open('http://localhost:8000')     
-            os.system("python webtext.py --title %s"%(command[4]))                #title格式 'this is a title'
-    elif command[1]=='book':
-        pass
+    if command[2]=='markdown':
+        os.system("python handlemd.py new")
+    elif command[2]=='webtext':
+        webbrowser.open('http://localhost:8000')     
+        os.system("python webtext.py --title %s"%(command[4]))                #title格式 'this is a title'
 elif command[1]=='change':
     if command[2]=='markdown':
         os.system('python handlemd.py change %s'%(command[3]))                     #用第一个md文件替换内容
@@ -97,21 +94,28 @@ elif command[1]=='list':
         print('init 失败了') 
 elif command[1]=='delete':
     try:
-        con=sqlite3.connect(os.path.join('outcome','data.db'))
-        cur=con.cursor()
-        if(input('确认要删除 %s吗？(y/n)'%(command[2]))=='y'):
-            cur.execute('DELETE * FROM ARTICAL WHERE ID=?',(command[2]))
+        if(command[2]=="*"):
+             if(input('确认要删除所有博客吗?(y/n)')=='y'):
+                 cur.execute('DELETE  FROM ARTICAL')
+        else:
+            con=sqlite3.connect(os.path.join('outcome','data.db'))
+            cur=con.cursor()
+            if(input('确认要删除 %s吗？(y/n)'%(''.join(command[2])))=='y'):
+                cur.execute('DELETE FROM ARTICAL WHERE ID=:id',{'id':''.join(command[2])})
         con.commit()
         con.close()
-    except:
-        print('init 失败了') 
+        postdata()
+    except Exception as e:
+        print(e) 
+elif command[1]=='preview':
+    webbrowser.open(os.path.join('githubpage','index.html'))
 elif command[1]=='help':
     data='''
 maxwellyang github blog 命令行工具
 init 初始化git与个人资料
 state 查看个人资料
 new  新建blog文章 
-    post blog文章 
+     blog文章 
         markdown 
         webtext 'this is title'
 change 更改文章内容

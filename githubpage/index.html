@@ -99,30 +99,16 @@
             width: 10%;
             height: 100%;
             display: inline;
-            z-index: 5;
+            z-index: 6;
         }
         
-        #bookcontent {
-            position: absolute;
-            width: 80%;
-            height: 100%;
-            left: 10%;
+        #keyword {
+            width: 100%;
+            height: 30px;
             display: inline;
-        }
-        
-        #bookcontent>img {
-            position: absolute;
-            width: auto;
-            height: auto;
-            left: 25%;
-            top: 15%;
-        }
-        
-        #bookcontent>span {
-            position: absolute;
-            width: auto;
-            height: auto;
-            top: 40%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 0px solid;
+            z-index: 5;
         }
         
         #postlist {
@@ -146,6 +132,8 @@
             top: 1.5%;
             right: 5%;
             z-index: 10;
+            overflow: auto;
+            -webkit-overflow-scrolling: rgba(255, 255, 255, 0.5);
         }
         
         #backgroundimg {
@@ -188,30 +176,35 @@
             <div>{{info.introduction}}</div>
             <p id="education">教育经历</p>
             <div>{{info.education}}</div>
-            <p id="award">所获奖项</p>
+            <p id="award">兴趣点</p>
             <div>{{info.award}}</div>
 
         </div>
     </div>
     <div id="advisor">
         <div id="block1">
-            <span id="book" :class="{book_selected:book_selected}" class="colorhead" @click="book_selectedf()">书籍</span>
-            <span id="navigation" :class="{list_selected:list_selected}" class="colorhead" style="left:50%;" @click="list_selectedf()">帖子</span>
+            <span id="book" :class="{book_selected:book_selected}" class="colorhead" @click="book_selectedf()">搜索</span>
+            <span id="navigation" :class="{list_selected:list_selected}" class="colorhead" style="left:50%;" @click="list_selectedf()">博客</span>
         </div>
         <div id="block2">
             <img id="before" class="colorhead" src="images/left.svg" style="left:0%" @click="before()">
-            <div id="bookcontent" v-show="view_book">
-                <img id="book_img" src="images/1194865.png">
-                <span id="book_rew">{{bookrew}}</span>
-            </div>
-            <div id="postlist" v-show="view_list">
-                <div :id="item.postintro.id" class="colorhead postlist_item" v-for="item in postlist" @click="view_content(item.postintro.id)">
-                    <p id="title" style="font-size:larger;color:rgb(34,35,118)">{{item.postintro.title}}</p>
+            <div id="search" v-show="view_search">
+                <input id="keyword" v-model="keyword">
+                <div :id="item.id" class="colorhead postlist_item" v-for="item in datalist" @click="view_content(item.id)">
+                    <p id="title" style="font-size:larger;color:rgb(34,35,118)">{{item.title}}</p>
+                    <!--组件复用！-->
                     <!--<p id="simintro" style="font-size:smaller;color:rgb(34,35,118);">{{item.intro}}</p>内容简介动画表现未完成-->
-                    <p id="date" style="font-size:medium;color:rgb(34,35,118)">{{item.postintro.date}}</p>
+                    <p id="date" style="font-size:medium;color:rgb(34,35,118)">{{item.date}}</p>
                 </div>
             </div>
-            <img id="after" class="colorhead" style="right:0%" src="images/right.svg" @click="after()">
+            <div id="postlist" v-show="view_list">
+                <div :id="item.id" class="colorhead postlist_item" v-for="item in datalist" @click="view_content(item.id)">
+                    <p id="title" style="font-size:larger;color:rgb(34,35,118)">{{item.title}}</p>
+                    <!--<p id="simintro" style="font-size:smaller;color:rgb(34,35,118);">{{item.intro}}</p>内容简介动画表现未完成-->
+                    <p id="date" style="font-size:medium;color:rgb(34,35,118)">{{item.date}}</p>
+                </div>
+            </div>
+            <img id="after" class="colorhead" style="right:0%;top:0px;" src="images/right.svg" @click="after()">
         </div>
     </div>
     <div id="postview" v-html="content">
@@ -220,18 +213,24 @@
     <script>
         var post_data = data || [];
         var sum = post_data.length;
-        for (var i = 0; i < sum; i++) {
-            var data = JSON.parse(post_data[i]);
-            post_data[i] = data
-        }
+
         var search = function(id) {
             var sum = post_data.length;
             for (var i = 0; i < sum; i++) {
-                //var data = JSON.parse(post_data[i]);
-                if (post_data[i].postintro.id == id) {
-                    return post_data[i].post.content;
+                if (post_data[i].id == id) {
+                    return post_data[i].content;
                 }
             }
+        }
+        var search_text = function(text) {
+            var sum = post_data.length;
+            var outcome = [];
+            for (var i = 0; i < 2; i++) {
+                if (post_data[i].title.search(text) == 0) {
+                    outcome.push(post_data[i])
+                }
+            }
+            return outcome;
         }
         var leftbar = new Vue({
             el: '#leftbar',
@@ -239,7 +238,7 @@
                 info: {
                     introduction: '挣好多钱 在丛林里建一个小木屋 研究自己喜欢的东西 \n 党外马克思主义者',
                     education: '西安交通大学 物理学',
-                    award: '知乎第一喷子',
+                    award: '量子计算机与量子编程 \n 计算机 \n 黑科技 \n 历史哲学 \n 推理科幻小说 ',
                 }
             }
         });
@@ -247,59 +246,87 @@
             el: '#advisor',
             data: {
                 postflag: 0,
-                view_book: false,
+                searchflag: 0,
+                view_search: false,
                 view_list: true,
-                book_selected: false,
+                search_selected: false,
                 list_selected: true,
-                bookrew: "这里是书籍评价",
-                postlist: post_data.slice(0, 4),
+                keyword: "",
+                postl: sum,
+                searchl: 0,
+                datalist: post_data.slice(0, 4),
+                search_data: []
             },
             methods: {
                 book_selectedf: function() {
-                    this.book_selected = true;
-                    this.view_book = true;
+                    this.search_selected = true;
+                    this.view_search = true;
                     this.list_selected = false;
                     this.view_list = false;
+                    this.datalist = [];
                 },
                 list_selectedf: function() {
-                    this.book_selected = false;
-                    this.view_book = false;
+                    this.search_selected = false;
+                    this.view_search = false;
                     this.list_selected = true;
                     this.view_list = true;
+                    this.datalist = post_data.slice(0, 4);
                 },
                 view_content: function(id) {
                     var data = search(id);
                     postview.change_content(data);
                 },
                 before: function() {
-                    if (this.postflag == 0) {
-                        this.postlist = post_data.slice(post_data.length - 4, post_data.length);
-                        this.postflag = post_data.length - 4;
-                        console.log(this.postflag);
-                    } else if (this.postflag <= 4) {
-                        this.postflag = 0;
-                        this.postlist = post_data.slice(this.postflag, this.postflag + 4);
-                        console.log(this.postflag);
+                    if (this.list_selected == 1) {
+                        this.datalist = post_data.slice(this.postflag - 4, this.postflag);
+                        this.postflag = this.postflag - 4;
+
+
                     } else {
-                        this.postflag -= 4;
-                        this.postlist = post_data.slice(this.postflag, this.postflag + 4);
-                        console.log(this.postflag);
+                        this.datalist = this.search_data.slice(this.searchflag - 4, this.searchflag);
+                        this.searchflag = this.searchflag - 4;
+
                     }
-                    console.log(this.postflag);
                 },
+
                 after: function() {
-                    if (post_data.length - this.postflag <= 4) {
-                        this.postlist = post_data.slice(this.postflag, post_data.length);
-                        this.postflag = 0;
-                        console.log(this.postflag);
-                    } else {
+                    if (this.list_selected == 1) {
+                        this.datalist = post_data.slice(this.postflag, this.postflag + 4);
                         this.postflag += 4;
-                        this.postlist = post_data.slice(this.postflag, post_data.length);
-                        console.log(this.postflag);
+
+                    } else {
+                        this.datalist = this.search_data.slice(this.searchflag, this.searchflag + 4);
+                        this.searchflag += 4;
+
                     }
-                    console.log(this.postflag);
-                },
+                }
             },
+            watch: {
+                keyword: function(val, oldval) {
+                    if (val != "") {
+                        var a = search_text(val);
+                        this.search_data = a;
+                        this.datalist = a;
+                        this.searchl = a.length;
+
+                    } else this.datalist = [];
+                },
+                postflag: function(val, old) {
+                    if (val < 0) this.postflag = 0;
+                    else if (val > this.postl) {
+                        this.datalist = post_data.slice(this.postflag - 4, this.postl);
+                        this.postflag -= 4
+                    }
+                },
+                searchflag: function(val, old) {
+                    if (val < 0) this.searchflag = 0;
+                    else if (val > this.postl) {
+                        this.datalist = this.search_data.slice(this.searchflag - 4, this.searchl);
+                        this.searchflag -= 4
+                    }
+                }
+
+            }
 
         });
         var postview = new Vue({
@@ -310,6 +337,7 @@
             methods: {
                 change_content: function(content) {
                     this.content = content;
+
                 }
             }
         })
